@@ -1,17 +1,34 @@
 import express from "express";
-import globalRouter from "./routers/globalRouter";
-import storyRouter from "./routers/storyRouter";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import rootRouter from "./routers/rootRouter";
+import videoRouter from "./routers/videoRouter";
 import userRouter from "./routers/userRouter";
-
-const PORT = 4000;
+import apiRouter from "./routers/apiRouter";
+import { localsMiddleware } from "./middlewares";
+import flash from "express-flash";
 
 const app = express();
 
-app.use("/", globalRouter);
-app.use("/videos", storyRouter);
+app.set("view engine", "pug");
+app.set("views", process.cwd() + "/src/views");
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(
+    session({
+      secret: process.env.COOKIE_SECRET,
+      resave: true,
+      saveUninitialized: true,
+      store: MongoStore.create({mongoUrl: process.env.DB_URL})
+    })
+);
+app.use(flash());
+app.use(localsMiddleware);
+app.use("/uploads", express.static("uploads"));
+app.use("/static", express.static("assets"));
+app.use("/", rootRouter); 
+app.use("/videos", videoRouter);
 app.use("/users", userRouter);
+app.use("/api", apiRouter);
 
-const handleListening = () =>
-  console.log(`✅ Server listenting on port http://localhost:${PORT} 🚀`);
-
-app.listen(PORT, handleListening);
+export default app;
