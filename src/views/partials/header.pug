@@ -22,7 +22,10 @@ header
                         if loggedInUser.avatarUrl === ""
                             span 😀
                         else
-                            img.avatar(src="/" + loggedInUser.avatarUrl)
+                            if loggedInUser.socialOnly
+                                img.avatar(src=loggedInUser.avatarUrl)
+                            else 
+                                img.avatar(src="/" + loggedInUser.avatarUrl)
             else
                 li
                     a(href="/login")  Login                        
