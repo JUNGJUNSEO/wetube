@@ -31,17 +31,28 @@ block content
     if loggedIn
         div.video__add-comments
             form.video__comment-form#commentForm
-                textarea(cols="30", rows="10", placeholder="Write a nice commment...")
+                textarea(placeholder="Write a nice commment...")
                 button Add Comment
-        div.video__comments
-            ul
-                each comment in video.comments.reverse()
-                    li.video__comment(data-id=comment.id)
-                        i.fas.fa-comment 
-                        span #{comment.text}
-                        /videos/:id([0-9a-f]{24})/comment
-                        a(href=`${video.id}/${comment.id}/delete`)
-                            span ❌
+            div.video__comments
+                ul
+                    each comment in video.comments.reverse()
+                        li.video__comment(data-id=comment.id)
+                            div.video__user-comment
+                                a(href=`/users/${comment.owner}`)
+                                    img.avatar(src="/" + comment.avatarUrl)
+                                div.video__name-comment
+                                    span.video__owner-comment #{comment.name}
+                                    span #{comment.text}
+                            div.video__info-comment
+                                span.video__date-comment=new Date(comment.createdAt).toLocaleDateString("ko-kr", {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})
+                                div
+                                    if Number(comment.likes) > 1
+                                        span.video__like-comment #{comment.likes} likes
+                                    else
+                                        span.video__like-comment #{comment.likes} like
+                                    if String(comment.owner) === String(loggedInUser._id)
+                                        span.video__delete-comment delete
+                            
 block scripts
     script(src="/static/js/videoPlayer.js")
     script(src="/static/js/commentSection.js") 
