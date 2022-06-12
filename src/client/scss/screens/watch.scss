@@ -21,6 +21,8 @@
 
 .video__comment-form{
     max-width: 900px;
+    display: flex;
+    flex-direction: column;
     textarea{
         all: unset;
         padding: 15px 20px;
@@ -29,20 +31,30 @@
         margin-bottom: 5px;
         font-size: 15px;
         color: white;
-        width:90%;
+        width:95%;
         }
+    button{
+        all: unset;
+        cursor: pointer;
+        padding: 15px;
+        background-color: #202020;
+        align-self: flex-end;
+    }
 }
 
 .video__comments ul {
     display: flex;
     flex-direction: column;
     align-items: normal;
-    max-width: 690px;
-    width: 100%;
+    max-width: 900px;
+    width: 95%;
+    margin: 0 auto;
     .video__comment {
       padding: 10px;
       background-color: #202020;
       color: white;
+      margin-left: 0px;
+      border-bottom: 1px solid black;
       .video__user-comment{
           display: flex;
           align-items: center;
