@@ -57,6 +57,7 @@ export const postLogin = async (req, res) => {
         errorMessage: "Wrong password",
       });
     }
+  
     req.session.loggedIn = true;
     req.session.user = user;
     return res.redirect("/");
@@ -119,12 +120,13 @@ export const finishGithubLogin = async (req, res) => {
     if (!user) {
       user = await User.create({
         avatarUrl: userData.avatar_url,
-        name: userData.login,
+        name: userData.name,
         username: userData.login,
         email: emailObj.email,
         password: "",
         socialOnly: true,
-        location: userData.location,})
+        location: userData.location,
+      })
     } 
     req.session.loggedIn = true;
     req.session.user = user;
@@ -135,8 +137,8 @@ export const finishGithubLogin = async (req, res) => {
   }
 };
 export const logout = (req, res) => {
-  req.session.destroy();
   req.flash("info", "Bye Bye");
+  req.session.destroy();
   return res.redirect("/");
 };
 export const getEdit = (req, res) => {
