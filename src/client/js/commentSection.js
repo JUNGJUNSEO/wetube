@@ -1,28 +1,44 @@
 const videoContainer = document.getElementById("videoContainer");
 const form = document.getElementById("commentForm");
+const deleteComments = document.querySelectorAll(".video__delete-comment")
+const likeComments = document.querySelectorAll(".video__like-comment")
+let videoId = videoContainer.dataset.id;
 
-const addComment = (text, id) => {
+const addComment = (comment) => {
   const videoComments = document.querySelector(".video__comments ul");
-  const newComment = document.createElement("li");
-  newComment.dataset.id = id;
-  newComment.className = "video__comment";
-  const icon = document.createElement("i");
-  icon.className = "fas fa-comment";
-  const span = document.createElement("span");
-  span.innerText = ` ${text}`;
-  const span2 = document.createElement("span");
-  span2.innerText = "❌";
-  newComment.appendChild(icon);
-  newComment.appendChild(span);
-  newComment.appendChild(span2);
-  videoComments.prepend(newComment);
+  videoComments.insertAdjacentHTML('afterbegin',`
+            <li class="video__comment" data-id=${comment._id}>
+              <div class="video__user-comment" >
+                <a href="/users/${comment.owner}">
+                  <img class="avatar" src=/${comment.avatarUrl}>
+                </a>
+                <div class="video__name-comment">
+                  <span class="video__owner-comment">${comment.name}</span>
+                  <span>${comment.text}</span>
+                </div>
+              </div>
+              <div class="video__info-comment">
+                <span class="video__date-comment">
+                  ${new Date(comment.createdAt).toLocaleDateString("ko-kr", {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
+                </span>
+                <div>
+                  <span class="video__like-comment" id="like">${comment.likes} LIKE</span>
+                  <span class="video__delete-comment" id="delete">DELETE</span>
+                </div>
+              </div>
+
+            </li>
+            
+            `)
+  
+
 };
 
 const handleSubmit = async (event) => {
   event.preventDefault();
   const textarea = form.querySelector("textarea");
   const text = textarea.value;
-  const videoId = videoContainer.dataset.id;
+  
   if (text === "") {
     return;
   }
@@ -35,13 +51,62 @@ const handleSubmit = async (event) => {
   });
   if (response.status === 201) {
     textarea.value = "";
-    console.log(response)
-    const { newCommentId } = await response.json();
-    console.log(newCommentId)
-    addComment(text, newCommentId);
+    const { newComment } = await response.json();
+    addComment(newComment);
+    const deleteComment = document.getElementById("delete")
+    deleteComment.addEventListener("click", handleDeleteComment);
+    const likeComment = document.getElementById("like")
+    likeComment.addEventListener("click", handleLikeComment);
   }
 };
 
+const handleDeleteComment = async(event) =>{
+    const element = event.path[3]
+    const { dataset: {id: commentId}} = element
+    const response = await fetch(`/api/videos/${videoId}/delete/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+          },
+        body: JSON.stringify({ commentId }),
+      });
+      if (response.status === 201){
+          element.remove()
+      };
+      
+}
+
+const handleLikeComment = async(event) =>{
+  const element = event.path[3]
+  const { dataset: {id: commentId}} = element
+  const response = await fetch(`/api/videos/${videoId}/like/`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+        },
+      body: JSON.stringify({ commentId }),
+    });
+    if (response.status === 201){
+      const { newCommentLike } = await response.json();
+
+      event.target.innerText = (newCommentLike > 1) ? `${newCommentLike} LIKES` : `${newCommentLike} LIKE`
+          
+    };
+    
+}
+
+
 if (form) {
   form.addEventListener("submit", handleSubmit);
+}
+if (deleteComments) {
+    deleteComments.forEach((comment) => {
+        comment.addEventListener("click", handleDeleteComment)
+    })
+}
+
+if (likeComments) {
+  likeComments.forEach((like) => {
+      like.addEventListener("click", handleLikeComment)
+  })
 }
