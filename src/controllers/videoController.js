@@ -142,8 +142,65 @@ export const createComment = async (req, res) => {
     text,
     owner: user._id,
     video: id,
+    avatarUrl: user.avatarUrl,
+    name:user.name
   });
   video.comments.push(comment._id);
-  video.save();
-  return res.status(201).json({ newCommentId: comment._id });
+  await video.save();
+  return res.status(201).json({ newComment: comment });
 };
+
+export const deleteComment = async(req, res) => {
+  const {
+    body: { commentId },
+    params: { id }
+  } = req;
+
+  const video = await Video.findById(id);
+  if (!video) {
+    return res.sendStatus(404, { pageTitle: "Video not found." });
+  }
+  await Comment.findByIdAndDelete(commentId);
+  //찾아서 삭제하는 부분.
+  return res.sendStatus(201);
+};
+
+export const likeComment = async(req, res) => {
+  const {
+    body: { commentId },
+    params: { id }
+  } = req;
+
+  const video = await Video.findById(id);
+  if (!video) {
+    return res.sendStatus(404, { pageTitle: "Video not found." });
+  }
+  const comment = await Comment.findById(commentId);
+  comment.likes = comment.likes + 1
+  await comment.save()
+  //찾아서 삭제하는 부분.
+  return res.status(201).json({ newCommentLike: comment.likes });
+};
+
+// const video = await Video.findById(id);
+//   if (!video) {
+//     return res.sendStatus(404);
+//   }
+//   video.meta.views = video.meta.views + 1;
+//   await video.save();
+
+// export const deleteVideo = async (req, res) => {
+//   const { id } = req.params;
+//   const {
+//     user: { _id },
+//   } = req.session;
+//   const video = await Video.findById(id);
+//   if (!video) {
+//     return res.status(404).render("404", { pageTitle: "Video not found." });
+//   }
+//   if (String(video.owner) !== String(_id)) {
+//     return res.status(403).redirect("/");
+//   }
+//   await Video.findByIdAndDelete(id);
+//   return res.redirect("/");
+// };
